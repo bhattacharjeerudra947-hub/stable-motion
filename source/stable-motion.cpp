@@ -127,6 +127,7 @@ int main(int argc, char *argv[]) {
 
     int virtual_fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
     
+    ioctl(virtual_fd, UI_SET_EVBIT, EV_SYN);
     ioctl(virtual_fd, UI_SET_EVBIT, EV_KEY);
     ioctl(virtual_fd, UI_SET_KEYBIT, BTN_LEFT);
     ioctl(virtual_fd, UI_SET_KEYBIT, BTN_RIGHT);
@@ -141,6 +142,7 @@ int main(int argc, char *argv[]) {
     ioctl(virtual_fd, UI_SET_RELBIT, REL_HWHEEL);
 
     ioctl(virtual_fd, UI_SET_PROPBIT, INPUT_PROP_POINTER);
+    ioctl(virtual_fd, UI_DEV_CREATE);
 
     struct uinput_user_dev uidev;
     memset(&uidev, 0, sizeof(uidev));
