@@ -142,17 +142,18 @@ int main(int argc, char *argv[]) {
     ioctl(virtual_fd, UI_SET_RELBIT, REL_HWHEEL);
 
     ioctl(virtual_fd, UI_SET_PROPBIT, INPUT_PROP_POINTER);
+    ioctl(virtual_fd, UI_SET_PROPBIT, INPUT_PROP_DIRECT);
     ioctl(virtual_fd, UI_DEV_CREATE);
 
-    struct uinput_user_dev uidev;
-    memset(&uidev, 0, sizeof(uidev));
-    snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "Stable Motion");
-    uidev.id.bustype = BUS_USB;
-    uidev.id.vendor  = 0x1234;
-    uidev.id.product = 0x5678;
-    uidev.id.version = 1;
+    struct uinput_setup usetup;
+    memset(&usetup, 0, sizeof(usetup));
+    usetup.id.bustype = BUS_USB;
+    usetup.id.vendor  = 0x1234;
+    usetup.id.product = 0x5678;
+    usetup.id.version = 1;
+    strncpy(usetup.name, "Stable Motion Pro", UINPUT_MAX_NAME_SIZE);
 
-    write(virtual_fd, &uidev, sizeof(uidev));
+    ioctl(virtual_fd, UI_DEV_SETUP, &usetup);
     ioctl(virtual_fd, UI_DEV_CREATE);
 
     std::cout << "Stable Motion is live with glide value: " << smoothness_level << " \n";
