@@ -16,4 +16,38 @@ private:
     std::vector<int> buffer;
     fftw_complex *in, *out;
     fftw_plan p_forward, p_backward;
+
+    double previous_ouput = 0.0;
+    double alpha;
+    double fractional_remainder = 0.0;
+
+public:
+    STFTStableMotion(double smoothness_level) {
+        alpha = smoothness_level;
+
+        in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * SMC::WINDOW_SIZE);
+        out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * SMC::WINDOW_SIZE);
+
+        p_forward = fftw_plan_dft_1d(SMC::WINDOW_SIZE, in, out, FFTW_FORWARD, FFTW_MEASURE);
+        p_backward = fftw_plan_dft_1d(SMC::WINDOW_SIZE, out, in, FFTW_BACKWARD, FFTW_MEASURE);
+    }
+
+    ~STFTStableMotion() {
+        fftw_destroy_plan(p_forward);
+        fftw_destroy_plan(p_backward);
+        fftw_free(in);
+        fftw_free(out);
+    }
+
+    int apply(int new_val) {
+        buffer.push_back(new_val);
+        if (buffer.size() > SMC::WINDOW_SIZE) buffer.erase(buffer.begin());
+        if (buffer.size() < SMC::WINDOW_SIZE) return new_val;
+
+        for (int i = 0; i < SMC::WINDOW_SIZE; i++) {
+            in[i][0] = static_cast<double>(buffer[i]);
+            in[i][1] = 0.0;
+        }
+        
+    }
 };
